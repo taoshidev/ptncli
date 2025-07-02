@@ -1,0 +1,17 @@
+[project]
+name = "ptncli"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [{ name = "Kenneth Ashley", email = "ken.u.diggitt@gmail.com" }]
+dependencies = ["argparse>=1.4.0", "bittensor-cli>=9.7.1"]
+requires-python = "<3.14,>=3.13"
+readme = "README.md"
+license = { text = "MIT" }
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
