@@ -2,10 +2,7 @@ import asyncio
 import typer
 from bittensor_cli.src.commands import wallets
 
-app = typer.Typer()
-
-@app.command()
-def main(
+def list_command(
     wallet_path: str = typer.Option(
         "~/.bittensor/wallets",
         "--wallet-path",
@@ -33,5 +30,3 @@ async def extended_wallet_list(wallet_path: str = "~/.bittensor/wallets"):
 
     return result
 
-if __name__ == "__main__":
-    app()

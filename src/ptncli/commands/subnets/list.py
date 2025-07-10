@@ -4,10 +4,7 @@ from typing import Optional
 from bittensor_cli.src.bittensor.subtensor_interface import SubtensorInterface
 from bittensor_cli.src.commands.subnets import subnets
 
-app = typer.Typer()
-
-@app.command()
-def main(
+def list_command(
     network: Optional[str] = typer.Option(
         None,
         "--network",
@@ -83,5 +80,3 @@ async def list_subnets(
         print(f"Error listing subnets: {e}")
         return False
 
-if __name__ == "__main__":
-    app()

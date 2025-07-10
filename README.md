@@ -1,5 +1,4 @@
 ![Screenshot](assets/ptncli.png)
-
 <div align="center">
 
 ## Revolutionizing Financial Market Trading

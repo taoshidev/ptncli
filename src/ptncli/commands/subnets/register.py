@@ -52,7 +52,7 @@ async def add_collateral(wallet_name: str):
       return None
 
   console.print("[yellow]🔄 Creating stake transfer extrinsic...[/yellow]")
-  
+
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
       amount=10 * 10**9,
@@ -74,18 +74,13 @@ def register(
         "--wallet.path",
         help="Path to the wallet directory",
     ),
-    netuid: int = typer.Option(
-        8,
-        "--netuid",
-        help="Network UID to register to",
-    ),
     network: Optional[str] = typer.Option(
         'test',
         "--network",
         "--subtensor.network",
         "--chain",
         "--subtensor.chain_endpoint",
-        help="The subtensor network to connect to. Default: finney.",
+        help="The subtensor network to connect to. Default: test.",
     ),
     era: Optional[int] = typer.Option(
         None,
@@ -105,17 +100,20 @@ def register(
 ):
     """Add collateral to the wallet"""
     
+    # Set netuid based on network
+    netuid = 116 if network == 'test' else 8
+
     # Display the main title with Rich Panel
     title = Text("🔗 PROPRIETARY TRADING NETWORK 🔗", style="bold blue")
     subtitle = Text("Registration & Collateral Setup", style="italic cyan")
-    
+
     panel = Panel.fit(
         f"{title}\n{subtitle}",
         style="bold blue",
         border_style="bright_blue"
     )
     console.print(panel)
-    
+
     console.print("\n[yellow]🔄 Decrypting wallet...[/yellow]")
     
     try:
@@ -169,7 +167,6 @@ def register(
 async def register_subnet(
     wallet_name: str,
     wallet_path: str,
-    netuid: int = 8,
     network: Optional[str] = None,
     era: Optional[int] = None,
     json_output: bool = False,
@@ -181,12 +178,13 @@ async def register_subnet(
     Args:
         wallet_name: Name of the wallet to use for registration
         wallet_path: Path to the wallet directory
-        netuid: Network UID to register to
         network: Network to connect to (e.g., 'finney', 'test', 'local')
         era: Era to register for (optional)
         json_output: Whether to output as JSON
         prompt: Whether to prompt for confirmation
     """
+    # Set netuid based on network
+    netuid = 116 if network == 'test' else 8
     # Initialize wallet
     wallet = Wallet(name=wallet_name, path=wallet_path)
 

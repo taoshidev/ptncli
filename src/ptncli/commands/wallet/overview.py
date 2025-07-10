@@ -5,10 +5,7 @@ from bittensor_wallet import Wallet
 from bittensor_cli.src.commands import wallets
 from bittensor_cli.src.bittensor.subtensor_interface import SubtensorInterface
 
-app = typer.Typer()
-
-@app.command()
-def main(
+def overview_command(
     wallet_name: str = typer.Option(
         None,
         "--wallet-name",
@@ -92,5 +89,3 @@ async def extended_wallet_overview(
         print(f"Error getting wallet overview: {e}")
         return None
 
-if __name__ == "__main__":
-    app()

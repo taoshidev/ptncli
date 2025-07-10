@@ -1,14 +1,14 @@
 import typer
-from .list import app as list_app
-from .overview import app as overview_app
-from .new_coldkey import app as new_coldkey_app
-from .new_hotkey import app as new_hotkey_app
+from .list import list_command
+from .overview import overview_command
+from .new_coldkey import new_coldkey_command
+from .new_hotkey import new_hotkey_command
 
 app = typer.Typer(help="Extended Bittensor wallet operations")
 
-app.add_typer(list_app, name="list")
-app.add_typer(overview_app, name="overview")
-app.add_typer(new_coldkey_app, name="new_coldkey")
-app.add_typer(new_hotkey_app, name="new_hotkey")
+app.command(name="list")(list_command)
+app.command(name="overview")(overview_command)
+app.command(name="new_coldkey")(new_coldkey_command)
+app.command(name="new_hotkey")(new_hotkey_command)
 
 __all__ = ["app"]

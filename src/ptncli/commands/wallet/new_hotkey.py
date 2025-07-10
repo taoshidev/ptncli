@@ -5,10 +5,7 @@ from typing import Optional
 from bittensor_wallet import Wallet
 from bittensor_cli.src.commands import wallets
 
-app = typer.Typer()
-
-@app.command()
-def main(
+def new_hotkey_command(
     wallet_name: str = typer.Option(
         None,
         "--wallet-name",
@@ -128,5 +125,3 @@ async def extended_wallet_new_hotkey(
 
     return result
 
-if __name__ == "__main__":
-    app()
