@@ -15,12 +15,21 @@ from collateral_sdk import CollateralManager, Network
 
 console = Console()
 
-async def add_collateral(wallet_name: str):
+
+# =================== hotkey needs to be registered
+# =================== need to have stake on hotkey
+# if not registered, throw warning
+# get stake
+
+async def add_collateral(wallet_name: str, network: str = 'test'):
   manager = CollateralManager(Network.TESTNET)
   wallet = Wallet(name=wallet_name)
 
   coldkey = wallet.get_coldkey()
   hotkey = wallet.get_hotkey()
+
+  # Set netuid based on network
+  netuid = 116 if network == 'test' else 8
 
   with Progress(
       SpinnerColumn(),
@@ -29,7 +38,7 @@ async def add_collateral(wallet_name: str):
   ) as progress:
       task = progress.add_task("Fetching stake information...", total=None)
       source_stake = manager.subtensor_api.staking.get_stake_for_coldkey(coldkey.ss58_address)
-      
+
       progress.update(task, description="Checking balance...")
       balance = manager.balance_of(coldkey.ss58_address)
       progress.stop()
@@ -38,13 +47,53 @@ async def add_collateral(wallet_name: str):
   table = Table(title="Wallet Information", show_header=True, header_style="bold magenta")
   table.add_column("Property", style="cyan", no_wrap=True)
   table.add_column("Value", style="green")
-  
+
   table.add_row("Coldkey Address", coldkey.ss58_address)
   table.add_row("Hotkey Address", hotkey.ss58_address)
-  table.add_row("Source Stake", str(source_stake) if source_stake else "None")
-  table.add_row("Balance", str(balance))
+  # Handle Balance object formatting
+  try:
+      if hasattr(balance, 'value'):
+          balance_str = str(balance.value)
+      elif hasattr(balance, 'free'):
+          balance_str = str(balance.free)
+      else:
+          balance_str = repr(balance)
+  except Exception:
+      balance_str = repr(balance)
   
+  table.add_row("Balance", balance_str)
+
   console.print(table)
+
+  # Create a separate table for stake information
+  if source_stake:
+      stake_title = "Source Stake Information"
+      if network == 'test':
+          stake_title += " (testnet)"
+      stake_table = Table(title=stake_title, show_header=True, header_style="bold cyan")
+      stake_table.add_column("Hotkey", style="yellow", no_wrap=True)
+      stake_table.add_column("Netuid", justify="center", style="blue")
+      stake_table.add_column("Stake Amount", justify="right", style="green")
+      stake_table.add_column("Locked", justify="right", style="red")
+      stake_table.add_column("Registered", justify="center", style="magenta")
+
+      for stake_info in source_stake:
+          # Only show stake info for the specified network
+          if stake_info.netuid == netuid:
+              # Format the hotkey address to show first 8 and last 6 characters
+              formatted_hotkey = f"{stake_info.hotkey_ss58[:8]}...{stake_info.hotkey_ss58[-6:]}"
+              
+              stake_table.add_row(
+                  formatted_hotkey,
+                  str(stake_info.netuid),
+                  f"{float(stake_info.stake):.4f}",
+                  f"{float(stake_info.locked):.4f}",
+                  "✅" if stake_info.is_registered else "❌"
+              )
+
+      console.print(stake_table)
+  else:
+      console.print("[yellow]ℹ️  No stake information available[/yellow]")
 
   # Check if source_stake is empty to avoid index error
   if not source_stake:
@@ -59,6 +108,7 @@ async def add_collateral(wallet_name: str):
       dest=coldkey.ss58_address,
       source_stake=source_stake[0].hotkey_ss58, # pyright: ignore[reportIndexIssue]
       source_wallet=wallet,
+      # wallet_password
   )
 
   return extrinsic.value
@@ -115,41 +165,43 @@ def register(
     console.print(panel)
 
     console.print("\n[yellow]🔄 Decrypting wallet...[/yellow]")
-    
+
     try:
-        result = asyncio.run(add_collateral(wallet_name=wallet_name))
+        result = asyncio.run(add_collateral(wallet_name=wallet_name, network=network))
         if result is None:
             console.print("[red]❌ Collateral setup failed[/red]")
             return False
         console.print("[green]✅ Collateral added successfully[/green]")
+        #
+        # =================================================== hitting api
+        #
     except Exception as e:
         console.print(f"[red]❌ Error adding collateral: {e}[/red]")
         return False
 
     console.print("\n[yellow]🔄 Initiating subnet registration...[/yellow]")
-    
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
         task = progress.add_task("Registering to subnet...", total=None)
-        
+
         try:
             result = asyncio.run(register_subnet(
                 wallet_name=wallet_name,
                 wallet_path=wallet_path,
-                netuid=netuid,
                 network=network,
                 era=era,
                 json_output=json_output,
                 prompt=prompt,
             ))
             progress.stop()
-            
+
             if result:
                 console.print("[green]✅ Registration completed successfully![/green]")
-                
+
                 # Show success panel
                 success_panel = Panel.fit(
                     "🎉 Welcome to the Proprietary Trading Network!\nYour registration is complete.",
