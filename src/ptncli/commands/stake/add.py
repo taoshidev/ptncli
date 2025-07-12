@@ -60,7 +60,7 @@ async def stake_add(
     """
     # Create subtensor interface inside async context
     subtensor = SubtensorInterface(network=network)
-    
+
     # Set netuid based on network
     netuid = 116 if network == 'test' else 8
 
