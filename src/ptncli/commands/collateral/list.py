@@ -79,8 +79,8 @@ def list_command(
             return True
         
         # Display results in a nice table format
-        balance = response.get("balance", "Unknown")
-        status = response.get("status", "Unknown")
+        balance_rao = response.get("balance_rao", 0)
+        balance_theta = response.get("balance_theta", 0.0)
         
         # Create a table for the results
         table = Table(title="Collateral Balance Information", show_header=True, header_style="bold magenta")
@@ -88,8 +88,8 @@ def list_command(
         table.add_column("Value", style="green")
         
         table.add_row("Miner Address", miner_address)
-        table.add_row("Collateral Balance", str(balance))
-        table.add_row("Status", str(status))
+        table.add_row("Collateral Balance (RAO)", str(balance_rao))
+        table.add_row("Collateral Balance (THETA)", str(balance_theta))
         
         if wallet_name:
             table.add_row("Wallet Name", wallet_name)
