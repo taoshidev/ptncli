@@ -1,6 +1,7 @@
 import asyncio
 import getpass
-from typing import Any
+import json
+from typing import Any, Dict, Optional
 from bittensor_wallet import Wallet
 from rich.console import Console
 from rich.table import Table
@@ -10,8 +11,10 @@ from collateral_sdk import CollateralManager, Network
 
 console = Console()
 
-async def add_collateral(wallet: Wallet, network: str = 'test'):
+async def add_collateral(wallet: Wallet, network: str = 'test') -> Optional[Dict[str, Any]]:
   manager = CollateralManager(Network.TESTNET if network == 'test' else Network.MAINNET)
+
+  console.print("[blue]Adding Collateral[/blue]")
 
   password = getpass.getpass(prompt='Re-enter wallet password: ')
 
@@ -29,7 +32,7 @@ async def add_collateral(wallet: Wallet, network: str = 'test'):
       task = progress.add_task("Fetching stake information...", total=None)
       source_stake: Any = manager.subtensor_api.staking.get_stake_for_coldkey(coldkey.ss58_address)
 
-      progress.update(task, description="Checking balance...")
+      progress.update(task, description="Checking Wallet Information...")
       balance: Any = manager.balance_of(coldkey.ss58_address)
       progress.stop()
 
@@ -59,10 +62,14 @@ async def add_collateral(wallet: Wallet, network: str = 'test'):
   table.add_row("Balance", balance_str)
 
   # Add stake information if available
+  # Find the StakeInfo that matches the netuid
+  matching_stake = None
   if source_stake:
       for stake_info in source_stake:
           # Only show stake info for the specified network
           if stake_info.netuid == netuid:
+              matching_stake = stake_info
+
               # Format the hotkey address to show first 8 and last 6 characters
               formatted_hotkey = f"{stake_info.hotkey_ss58[:8]}...{stake_info.hotkey_ss58[-6:]}"
 
@@ -81,15 +88,42 @@ async def add_collateral(wallet: Wallet, network: str = 'test'):
       console.print("[red]❌ No source stake found for this coldkey[/red]")
       return None
 
+  if not matching_stake:
+      console.print(f"[red]❌ No stake found for netuid {netuid}[/red]")
+      return None
+
   console.print("[yellow]🔄 Creating stake transfer extrinsic...[/yellow]")
+
+  amount = 10 * 10**9
 
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
-      amount=10 * 10**9,
-      dest=coldkey.ss58_address,
-      source_stake=source_stake[0].hotkey_ss58,
+      amount=amount,
+      dest='5F4xUo5pBJmzzFjqxmXNXL1NKPF3ugcAfYUvAc2LGERgrxNJ',
+      source_stake=matching_stake.hotkey_ss58,
       source_wallet=wallet,
       wallet_password=password
   )
 
-  return extrinsic.value
+  console.print(f"extrinsic: {extrinsic}")
+  console.print(json.dumps(str(extrinsic), indent=2))
+
+  encoded = manager.encode_extrinsic(extrinsic)
+  decoded = manager.decode_extrinsic(encoded)
+
+  console.print("[cyan]Encoded extrinsic:[/cyan]")
+  console.print(json.dumps(str(encoded), indent=2))
+
+  console.print("[cyan]Decoded extrinsic:[/cyan]")
+  console.print(json.dumps(str(decoded), indent=2))
+
+  result_dict = {
+      "encoded": encoded.hex(),
+      "amount": amount,
+      "coldkey": coldkey.ss58_address,
+  }
+
+  console.print("[cyan]Returning result:[/cyan]")
+  console.print(json.dumps(result_dict, indent=2, default=str))
+
+  return result_dict

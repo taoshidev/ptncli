@@ -10,7 +10,12 @@
 
 ## Description
 
-PTNCLI sits on top of the bittensor-cli tool and extends it by customizing and hooking into commands. As a subnet on the Bittensor network, PTN requires additional collateral setup during registration, which this tool automates alongside the standard subnet registration process.
+PTNCLI sits on top of the bittensor-cli tool and extends it by customizing and hooking into commands. As a subnet on the Bittensor network, PTN operates on **subnet 8 (netuid: 8)** on the mainnet/finney network and **subnet 116 (netuid: 116)** on the testnet. PTN requires additional collateral setup during registration, which this tool automates alongside the standard subnet registration process.
+
+### Network Targeting
+- **Mainnet/Finney**: Targets subnet 8 (netuid: 8)
+- **Testnet**: Targets subnet 116 (netuid: 116)
+- Commands automatically select the correct subnet based on the network parameter
 
 ## Installation
 
@@ -88,7 +93,9 @@ Lists all available subnets with detailed information.
 ```bash
 ptncli subnets register [OPTIONS]
 ```
-Registers a neuron to the Proprietary Trading Network (subnet 8 on mainnet, subnet 116 on testnet) with automatic collateral setup.
+Registers a neuron to the Proprietary Trading Network with automatic collateral setup. Automatically targets:
+- **Subnet 8 (netuid: 8)** on mainnet/finney
+- **Subnet 116 (netuid: 116)** on testnet
 
 **Options:**
 - `--wallet-name, --name` - Name of the wallet to use for registration
@@ -105,7 +112,9 @@ Registers a neuron to the Proprietary Trading Network (subnet 8 on mainnet, subn
 ```bash
 ptncli stake add [OPTIONS]
 ```
-Add stake to hotkeys on the Proprietary Trading Network.
+Add stake to hotkeys on the Proprietary Trading Network. Automatically targets:
+- **Subnet 8 (netuid: 8)** on mainnet/finney
+- **Subnet 116 (netuid: 116)** on testnet
 
 **Options:**
 - `--wallet-name, --name` - Name of the wallet to use (required)
@@ -140,26 +149,74 @@ Lists stakes for a wallet with detailed information.
 - `--json` - Output result as JSON
 - `--prompt/--no-prompt` - Whether to prompt for confirmation
 
+### Collateral Operations
+
+#### List Collateral Balance
+```bash
+ptncli collateral list [OPTIONS]
+```
+Check collateral balance for a miner address.
+
+**Options:**
+- `--miner-address, --miner_address` - Miner SS58 address to check collateral balance for (required)
+- `--wallet-name, --name` - Name of the wallet (for display purposes)
+- `--json` - Output result as JSON
+
+#### Withdraw Collateral
+```bash
+ptncli collateral withdraw [OPTIONS]
+```
+Withdraw collateral from the Proprietary Trading Network.
+
+**Options:**
+- `--amount` - Amount to withdraw from collateral (required)
+- `--miner-address, --miner_address` - Miner SS58 address to withdraw collateral for (required)
+- `--wallet-name, --name` - Name of the wallet (for display purposes)
+- `--wallet-path` - Path to wallet directory (default: `~/.bittensor/wallets`)
+- `--prompt/--no-prompt` - Whether to prompt for confirmation
+
 ## Examples
 
 ### Register to PTN with collateral
 ```bash
+# Register on testnet (targets subnet 116)
 ptncli subnets register --wallet-name my_wallet --hotkey my_hotkey --network test
+
+# Register on mainnet (targets subnet 8)
+ptncli subnets register --wallet-name my_wallet --hotkey my_hotkey --network finney
 ```
 
 ### List wallet stakes with live monitoring
 ```bash
+# List stakes on mainnet
 ptncli stake list --wallet-name my_wallet --live --network finney
+
+# List stakes on testnet
+ptncli stake list --wallet-name my_wallet --live --network test
 ```
 
 ### Add stake to all hotkeys
 ```bash
+# Add stake on mainnet (subnet 8)
 ptncli stake add --wallet-name my_wallet --all-hotkeys --amount 10.0 --network finney
+
+# Add stake on testnet (subnet 116)
+ptncli stake add --wallet-name my_wallet --all-hotkeys --amount 10.0 --network test
 ```
 
 ### View wallet overview
 ```bash
 ptncli wallet overview --wallet-name my_wallet --network finney
+```
+
+### Check collateral balance
+```bash
+ptncli collateral list --miner-address 5HE... --wallet-name my_wallet
+```
+
+### Withdraw collateral
+```bash
+ptncli collateral withdraw --amount 5.0 --miner-address 5HE... --wallet-name my_wallet
 ```
 
 ## Requirements
