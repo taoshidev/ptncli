@@ -13,8 +13,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.text import Text
 import time
 
-from ptncli.utils.collateral import add_collateral
-from ptncli.utils.api import make_api_request
 
 console = Console()
 
@@ -111,11 +109,6 @@ def register(
         "--dev",
         help="Show verbose debug output",
     ),
-    amount: Optional[float] = typer.Option(
-        None,
-        "--amount",
-        help="Amount of TAO to use for collateral (default: 1)",
-    ),
 ):
     # Set netuid based on network
     netuid = 116 if network == 'test' else 8
@@ -159,7 +152,7 @@ def register(
 
                 # Show success panel
                 success_panel = Panel.fit(
-                    "🎉 Welcome to the Proprietary Trading Network!\nYour registration is complete.",
+                    "🎉 Welcome to the Proprietary Trading Network!\nYour registration is complete.\n\nTo add collateral, run: ptncli collateral add",
                     style="bold green",
                     border_style="green"
                 )
@@ -169,39 +162,4 @@ def register(
             console.print(f"[red]❌ Error during registration: {e}[/red]")
             return False
 
-    try:
-        result = asyncio.run(add_collateral(wallet=wallet, network=network or 'test', dev=dev, amount=amount))
-
-        if dev:
-            print(result)
-
-        if result is None:
-            console.print("[red]❌ Collateral setup failed[/red]")
-            return False
-
-        console.print("[green]✅ Extrinsic Created successfully[/green]")
-
-        console.print("sending extrinsic")
-
-        try:
-            # Convert bytearray to hex string for JSON serialization
-            encoded_data = result["encoded"]
-            if isinstance(encoded_data, bytearray):
-                encoded_data = encoded_data.hex()
-
-            payload = {
-                "extrinsic": encoded_data,
-            }
-
-            # Use the new API utility
-            response = make_api_request("/collateral/deposit", payload)
-            
-            if response is None:
-                console.print("[yellow]⚠️ API call failed[/yellow]")
-            
-        except Exception as api_error:
-            console.print(f"[yellow]⚠️ API call failed: {api_error}[/yellow]")
-
-    except Exception as e:
-        console.print(f"[red]❌ Error adding collateral: {e}[/red]")
-        return False
+    return result

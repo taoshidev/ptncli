@@ -15,8 +15,6 @@ console = Console()
 async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = False, amount: Optional[float] = None) -> Optional[Dict[str, Any]]:
   manager = CollateralManager(Network.TESTNET if network == 'test' else Network.MAINNET)
 
-  console.print("[blue]Adding Collateral[/blue]")
-
   password = getpass.getpass(prompt='Re-enter wallet password: ')
 
   coldkey = wallet.get_coldkey(password=password)
@@ -37,7 +35,7 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
       balance: Any = manager.balance_of(coldkey.ss58_address)
       progress.stop()
 
-  # Create a consolidated table to display wallet information with stake details
+  # Create wallet info table
   table_title = "Wallet Information"
   if network == 'test':
       table_title += " (testnet)"
@@ -62,29 +60,43 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
   table.add_row("Hotkey Address", hotkey.ss58_address)
   table.add_row("Balance", balance_str)
 
-  # Add stake information if available
-  # Find the StakeInfo that matches the netuid
+  console.print(table)
+
+  # Display all stake information in a single table
   matching_stake = None
   if source_stake:
+      # Create unified stake table
+      stake_table = Table(title="Stake Information", show_header=True, header_style="bold cyan")
+      stake_table.add_column("Hotkey", style="cyan", no_wrap=True)
+      stake_table.add_column("Netuid", style="magenta", no_wrap=True)
+      stake_table.add_column("Stake Amount", style="green", justify="right")
+      stake_table.add_column("Locked", style="yellow", justify="right")
+      stake_table.add_column("Registered", style="bold", justify="center")
+
       for stake_info in source_stake:
-          # Only show stake info for the specified network
+          # Format the hotkey address to show first 8 and last 6 characters
+          formatted_hotkey = f"{stake_info.hotkey_ss58[:8]}...{stake_info.hotkey_ss58[-6:]}"
+          
+          # Highlight the target netuid row
+          netuid_style = "bold green" if stake_info.netuid == netuid else "magenta"
+          
+          stake_table.add_row(
+              formatted_hotkey,
+              f"[{netuid_style}]{stake_info.netuid}[/{netuid_style}]",
+              f"{float(stake_info.stake):.4f}",
+              f"{float(stake_info.locked):.4f}",
+              "✅" if stake_info.is_registered else "❌"
+          )
+
+          # Set matching_stake for the target netuid
           if stake_info.netuid == netuid:
               matching_stake = stake_info
 
-              # Format the hotkey address to show first 8 and last 6 characters
-              formatted_hotkey = f"{stake_info.hotkey_ss58[:8]}...{stake_info.hotkey_ss58[-6:]}"
-
-              table.add_row("Hotkey", formatted_hotkey)
-              table.add_row("Netuid", str(stake_info.netuid))
-              table.add_row("Stake Amount", f"{float(stake_info.stake):.4f}")
-              table.add_row("Locked", f"{float(stake_info.locked):.4f}")
-              table.add_row("Registered", "✅" if stake_info.is_registered else "❌")
+      console.print(stake_table)
   else:
-      table.add_row("Stake Info", "No stake information available")
+      console.print("[yellow]No stake information available[/yellow]")
 
-  console.print(table)
-
-  # Check if source_stake is empty to avoid index error
+    # Check if source_stake is empty to avoid index error
   if not source_stake:
       console.print("[red]❌ No source stake found for this coldkey[/red]")
       return None
@@ -102,7 +114,7 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
 
   # Use configured dest address
   dest_address = COLLATERAL_DEST_ADDRESS
-  
+
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
       amount=amount,
