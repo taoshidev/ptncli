@@ -4,14 +4,15 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
+from bittensor_wallet import Wallet
 
 from ptncli.utils.api import make_api_request
 
 console = Console()
 
 def list_command(
-    miner_address: str = typer.Option(
-        ...,
+    miner_address: Optional[str] = typer.Option(
+        None,
         "--miner-address",
         "--miner_address",
         help="Miner SS58 address to check collateral balance for",
@@ -22,7 +23,15 @@ def list_command(
         "--wallet-name",
         "--wallet_name",
         "--name",
-        help="Name of the wallet (for display purposes)",
+        help="Name of the wallet to use (will derive miner address from wallet)",
+    ),
+    wallet_path: str = typer.Option(
+        "~/.bittensor/wallets",
+        "--wallet.path",
+        "--wallet-path",
+        "--wallet_path",
+        "--path",
+        help="Path to the wallet directory",
     ),
     json_output: bool = typer.Option(
         False,
@@ -36,7 +45,27 @@ def list_command(
     ),
 ):
     """List collateral balance for a miner address"""
-    
+
+    # Validate that either miner_address or wallet_name is provided
+    if not miner_address and not wallet_name:
+        if json_output:
+            console.print('{"error": "Either --miner-address or --wallet.name must be provided", "success": false}')
+        else:
+            console.print("[red]❌ Error: Either --miner-address or --wallet.name must be provided[/red]")
+        return False
+
+    # If wallet_name is provided, derive the miner address from the wallet
+    if wallet_name:
+        try:
+            wallet = Wallet(name=wallet_name, path=wallet_path)
+            miner_address = wallet.get_coldkey().ss58_address
+        except Exception as e:
+            if json_output:
+                console.print(f'{{"error": "Failed to load wallet: {e}", "success": false}}')
+            else:
+                console.print(f"[red]❌ Failed to load wallet '{wallet_name}': {e}[/red]")
+            return False
+
     if not json_output:
         # Display the main title with Rich Panel
         title = Text("🔗 PROPRIETARY TRADING NETWORK 🔗", style="bold blue")
@@ -50,52 +79,44 @@ def list_command(
 
         console.print(panel)
         console.print("[blue]Checking collateral balance[/blue]")
-        
-        # Show query details
-        console.print(f"[cyan]Miner address:[/cyan] {miner_address}")
-        
-        if wallet_name:
-            console.print(f"[cyan]Wallet:[/cyan] {wallet_name}")
-        
-        console.print("")
-    
+
     # Make the API request
     endpoint = f"/collateral/balance/{miner_address}"
-    
+
     try:
         response = make_api_request(endpoint, method="GET", dev_mode=dev_mode)
-        
+
         if response is None:
             if json_output:
                 console.print('{"error": "API request failed", "success": false}')
             else:
                 console.print("[red]❌ Failed to retrieve collateral balance[/red]")
             return False
-        
+
         # Handle successful response
         if json_output:
             import json
             console.print(json.dumps(response))
             return True
-        
+
         # Display results in a nice table format
         balance_rao = response.get("balance_rao", 0)
         balance_theta = response.get("balance_theta", 0.0)
-        
+
         # Create a table for the results
         table = Table(title="Collateral Balance Information", show_header=True, header_style="bold magenta")
         table.add_column("Field", style="cyan", no_wrap=True)
         table.add_column("Value", style="green")
-        
+
+        if wallet_name:
+            table.add_row("Wallet Name", wallet_name)
+
         table.add_row("Miner Address", miner_address)
         table.add_row("Collateral Balance (RAO)", str(balance_rao))
         table.add_row("Collateral Balance (THETA)", str(balance_theta))
-        
-        if wallet_name:
-            table.add_row("Wallet Name", wallet_name)
-        
+
         console.print(table)
-        
+
         # Show success message (only in dev mode)
         if response.get("success", True):
             if dev_mode:
@@ -105,7 +126,7 @@ def list_command(
             error_msg = response.get("error", "Unknown error occurred")
             console.print(f"[red]❌ Error: {error_msg}[/red]")
             return False
-            
+
     except Exception as e:
         if json_output:
             console.print(f'{{"error": "Exception occurred: {e}", "success": false}}')
