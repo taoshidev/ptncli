@@ -8,6 +8,10 @@
 
 **PTNCLI** is a command-line tool that extends the bittensor-cli tool for Proprietary Trading Network (PTN) operations. It provides enhanced registration functionality with collateral management and extends standard Bittensor wallet, subnet, and stake operations.
 
+## Note
+
+PTNCLI is in beta and is still under active development. Please report any issues or feedback on the [PTNCLI GitHub repository](https://github.com/proprietary-trading-network/ptncli).
+
 ## Description
 
 PTNCLI sits on top of the bittensor-cli tool and extends it by customizing and hooking into commands. As a subnet on the Bittensor network, PTN operates on **subnet 8 (netuid: 8)** on the mainnet/finney network and **subnet 116 (netuid: 116)** on the testnet. PTN requires additional collateral setup during registration, which this tool automates alongside the standard subnet registration process.
