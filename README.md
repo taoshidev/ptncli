@@ -19,22 +19,17 @@ PTNCLI sits on top of the bittensor-cli tool and extends it by customizing and h
 
 ## Installation
 
-### Homebrew (macOS/Linux)
-```bash
-brew install ptncli
-```
-
-### Pip
-```bash
-pip install ptncli
-```
-
 ### From Source
 ```bash
 git clone <repository-url>
 cd ptncli
 pip install .
 ```
+### Homebrew (macOS/Linux)
+Coming soon
+
+### Pip
+Coming soon
 
 ## Commands
 
@@ -77,19 +72,7 @@ Creates a new hotkey for the wallet.
 
 ### Subnet Operations
 
-#### List Subnets
-```bash
-ptncli subnets list [OPTIONS]
-```
-Lists all available subnets with detailed information.
-
-**Options:**
-- `--network` - Network to connect to (default: `finney`)
-- `--verbose` - Enable verbose output
-- `--live` - Display live view of the table
-- `--json` - Output result as JSON
-
-#### Register to Subnet
+#### Register to Subnet 8
 ```bash
 ptncli subnets register [OPTIONS]
 ```
@@ -122,16 +105,6 @@ Add stake to hotkeys on the Proprietary Trading Network. Automatically targets:
 - `--hotkey` - Hotkey name to use for staking
 - `--network` - Network to connect to (default: `finney`)
 - `--amount` - Amount of TAO to stake
-- `--stake-all` - Stake all available balance
-- `--all-hotkeys` - Stake to all hotkeys in the wallet
-- `--include-hotkeys` - List of hotkeys to include
-- `--exclude-hotkeys` - List of hotkeys to exclude
-- `--safe-staking` - Use safe staking with price tolerance
-- `--rate-tolerance` - Rate tolerance percentage (default: 0.05)
-- `--allow-partial-stake` - Allow partial stake if rate tolerance exceeded
-- `--era` - Blocks for transaction validity (default: 64)
-- `--json` - Output results in JSON format
-- `--prompt/--no-prompt` - Whether to prompt for confirmation
 
 #### List Stakes
 ```bash
@@ -162,7 +135,6 @@ Add collateral to the Proprietary Trading Network.
 - `--wallet-path` - Path to the wallet directory (default: `~/.bittensor/wallets`)
 - `--network` - Network to connect to (default: `test`)
 - `--amount` - Amount of TAO to use for collateral (default: 1)
-- `--dev` - Show verbose debug output
 
 #### List Collateral Balance
 ```bash
