@@ -36,7 +36,7 @@ def withdraw_command(
     ),
 ):
     """Withdraw collateral from the Proprietary Trading Network"""
-    
+
     # Display the main title with Rich Panel
     title = Text("🔗 PROPRIETARY TRADING NETWORK 🔗", style="bold blue")
     subtitle = Text("Collateral Withdrawal", style="italic cyan")
@@ -49,48 +49,47 @@ def withdraw_command(
 
     console.print(panel)
     console.print("[blue]Withdrawing collateral from PTN[/blue]")
-    
+
     # Load wallet and get keys
     wallet = Wallet(name=wallet_name, path=wallet_path)
     password = getpass.getpass(prompt='Re-enter wallet password: ')
-    
+
     coldkey = wallet.get_coldkey(password=password)
-    hotkey = wallet.get_hotkey(password=password)
-    
+
     # Show withdrawal details
     console.print(f"[cyan]Amount to withdraw:[/cyan] {amount}")
     console.print(f"[cyan]Wallet:[/cyan] {wallet_name}")
-    console.print(f"[cyan]Miner address:[/cyan] {hotkey.ss58_address}")
-    
+    console.print(f"[cyan]Miner address:[/cyan] {coldkey.ss58_address}")
+
     if prompt:
-        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} collateral for miner {hotkey.ss58_address}?")
+        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} collateral for miner {coldkey.ss58_address}?")
         if not confirm:
             console.print("[yellow]Withdrawal cancelled[/yellow]")
             return False
-    
+
     # Prepare payload for withdrawal
     payload = {
         "amount": amount,
-        "miner_address": hotkey.ss58_address
+        "miner_address": coldkey.ss58_address
     }
-    
+
     # Make the API request
     console.print("\n[cyan]Sending withdrawal request...[/cyan]")
-    
+
     try:
         response = make_api_request("/collateral/withdraw", payload)
-        
+
         if response is None:
             console.print("[red]❌ Withdrawal request failed[/red]")
             return False
-        
+
         # Check if withdrawal was successful
         if response.get("success", False):
             console.print("[green]✅ Collateral withdrawal successful![/green]")
-            
+
             # Show success panel
             success_panel = Panel.fit(
-                f"🎉 Withdrawal completed!\nAmount: {amount}\nMiner: {hotkey.ss58_address}",
+                f"🎉 Withdrawal completed!\nAmount: {amount}\nMiner: {coldkey.ss58_address}",
                 style="bold green",
                 border_style="green"
             )
@@ -100,7 +99,7 @@ def withdraw_command(
             error_msg = response.get("error", "Unknown error occurred")
             console.print(f"[red]❌ Withdrawal failed: {error_msg}[/red]")
             return False
-            
+
     except Exception as e:
         console.print(f"[red]❌ Error during withdrawal: {e}[/red]")
         return False

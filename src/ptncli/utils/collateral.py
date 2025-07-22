@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from collateral_sdk import CollateralManager, Network
+from ..config import COLLATERAL_DEST_ADDRESS
 
 console = Console()
 
@@ -99,10 +100,13 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
   collateral_amount = amount if amount is not None else 1
   amount = int(collateral_amount * 10**9)
 
+  # Use configured dest address
+  dest_address = COLLATERAL_DEST_ADDRESS
+  
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
       amount=amount,
-      dest='5Hghc5YciZvuZYLB9zryCGoWdfJffb16bv6tiK9h49a7hDWs',
+      dest=dest_address,
       source_stake=matching_stake.hotkey_ss58,
       source_wallet=wallet,
       wallet_password=password
