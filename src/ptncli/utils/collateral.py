@@ -11,7 +11,7 @@ from collateral_sdk import CollateralManager, Network
 
 console = Console()
 
-async def add_collateral(wallet: Wallet, network: str = 'test') -> Optional[Dict[str, Any]]:
+async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = False, amount: Optional[float] = None) -> Optional[Dict[str, Any]]:
   manager = CollateralManager(Network.TESTNET if network == 'test' else Network.MAINNET)
 
   console.print("[blue]Adding Collateral[/blue]")
@@ -92,9 +92,12 @@ async def add_collateral(wallet: Wallet, network: str = 'test') -> Optional[Dict
       console.print(f"[red]❌ No stake found for netuid {netuid}[/red]")
       return None
 
-  console.print("[yellow]🔄 Creating stake transfer extrinsic...[/yellow]")
+  if dev:
+    console.print("[yellow]🔄 Creating stake transfer extrinsic...[/yellow]")
 
-  amount = 10 * 10**9
+  # Use provided amount or default to 1 TAO
+  collateral_amount = amount if amount is not None else 1
+  amount = int(collateral_amount * 10**9)
 
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
@@ -105,17 +108,19 @@ async def add_collateral(wallet: Wallet, network: str = 'test') -> Optional[Dict
       wallet_password=password
   )
 
-  console.print(f"extrinsic: {extrinsic}")
-  console.print(json.dumps(str(extrinsic), indent=2))
+  if dev:
+    console.print(f"extrinsic: {extrinsic}")
+    console.print(json.dumps(str(extrinsic), indent=2))
 
   encoded = manager.encode_extrinsic(extrinsic)
   decoded = manager.decode_extrinsic(encoded)
 
-  console.print("[cyan]Encoded extrinsic:[/cyan]")
-  console.print(json.dumps(str(encoded), indent=2))
+  if dev:
+    console.print("[cyan]Encoded extrinsic:[/cyan]")
+    console.print(json.dumps(str(encoded), indent=2))
 
-  console.print("[cyan]Decoded extrinsic:[/cyan]")
-  console.print(json.dumps(str(decoded), indent=2))
+    console.print("[cyan]Decoded extrinsic:[/cyan]")
+    console.print(json.dumps(str(decoded), indent=2))
 
   result_dict = {
       "encoded": encoded.hex(),
@@ -123,7 +128,8 @@ async def add_collateral(wallet: Wallet, network: str = 'test') -> Optional[Dict
       "coldkey": coldkey.ss58_address,
   }
 
-  console.print("[cyan]Returning result:[/cyan]")
-  console.print(json.dumps(result_dict, indent=2, default=str))
+  if dev:
+    console.print("[cyan]Returning result:[/cyan]")
+    console.print(json.dumps(result_dict, indent=2, default=str))
 
   return result_dict

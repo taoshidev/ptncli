@@ -106,6 +106,16 @@ def register(
         "--prompt/--no-prompt",
         help="Whether to prompt for confirmation",
     ),
+    dev: bool = typer.Option(
+        False,
+        "--dev",
+        help="Show verbose debug output",
+    ),
+    amount: Optional[float] = typer.Option(
+        None,
+        "--amount",
+        help="Amount of TAO to use for collateral (default: 1)",
+    ),
 ):
     # Set netuid based on network
     netuid = 116 if network == 'test' else 8
@@ -160,9 +170,10 @@ def register(
             return False
 
     try:
-        result = asyncio.run(add_collateral(wallet=wallet, network=network or 'test'))
+        result = asyncio.run(add_collateral(wallet=wallet, network=network or 'test', dev=dev, amount=amount))
 
-        print(result)
+        if dev:
+            print(result)
 
         if result is None:
             console.print("[red]❌ Collateral setup failed[/red]")
