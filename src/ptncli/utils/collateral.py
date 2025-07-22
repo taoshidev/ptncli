@@ -102,7 +102,7 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
       amount=amount,
-      dest='5F4xUo5pBJmzzFjqxmXNXL1NKPF3ugcAfYUvAc2LGERgrxNJ',
+      dest='5Hghc5YciZvuZYLB9zryCGoWdfJffb16bv6tiK9h49a7hDWs',
       source_stake=matching_stake.hotkey_ss58,
       source_wallet=wallet,
       wallet_password=password

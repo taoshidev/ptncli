@@ -1,4 +1,5 @@
 import typer
+import getpass
 from typing import Optional
 from bittensor_wallet import Wallet
 from rich.console import Console
@@ -15,19 +16,13 @@ def withdraw_command(
         "--amount",
         help="Amount to withdraw from collateral",
     ),
-    miner_address: str = typer.Option(
+    wallet_name: str = typer.Option(
         ...,
-        "--miner-address",
-        "--miner_address",
-        help="Miner SS58 address to withdraw collateral for",
-    ),
-    wallet_name: Optional[str] = typer.Option(
-        None,
         "--wallet.name",
         "--wallet-name",
         "--wallet_name",
         "--name",
-        help="Name of the wallet (for display purposes)",
+        help="Name of the wallet",
     ),
     wallet_path: str = typer.Option(
         "~/.bittensor/wallets",
@@ -55,15 +50,20 @@ def withdraw_command(
     console.print(panel)
     console.print("[blue]Withdrawing collateral from PTN[/blue]")
     
+    # Load wallet and get keys
+    wallet = Wallet(name=wallet_name, path=wallet_path)
+    password = getpass.getpass(prompt='Re-enter wallet password: ')
+    
+    coldkey = wallet.get_coldkey(password=password)
+    hotkey = wallet.get_hotkey(password=password)
+    
     # Show withdrawal details
     console.print(f"[cyan]Amount to withdraw:[/cyan] {amount}")
-    console.print(f"[cyan]Miner address:[/cyan] {miner_address}")
-    
-    if wallet_name:
-        console.print(f"[cyan]Wallet:[/cyan] {wallet_name}")
+    console.print(f"[cyan]Wallet:[/cyan] {wallet_name}")
+    console.print(f"[cyan]Miner address:[/cyan] {hotkey.ss58_address}")
     
     if prompt:
-        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} collateral for miner {miner_address}?")
+        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} collateral for miner {hotkey.ss58_address}?")
         if not confirm:
             console.print("[yellow]Withdrawal cancelled[/yellow]")
             return False
@@ -71,7 +71,7 @@ def withdraw_command(
     # Prepare payload for withdrawal
     payload = {
         "amount": amount,
-        "miner_address": miner_address
+        "miner_address": hotkey.ss58_address
     }
     
     # Make the API request
@@ -90,7 +90,7 @@ def withdraw_command(
             
             # Show success panel
             success_panel = Panel.fit(
-                f"🎉 Withdrawal completed!\nAmount: {amount}\nMiner: {miner_address}",
+                f"🎉 Withdrawal completed!\nAmount: {amount}\nMiner: {hotkey.ss58_address}",
                 style="bold green",
                 border_style="green"
             )
