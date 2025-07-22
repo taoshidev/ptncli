@@ -151,6 +151,19 @@ Lists stakes for a wallet with detailed information.
 
 ### Collateral Operations
 
+#### Add Collateral
+```bash
+ptncli collateral add [OPTIONS]
+```
+Add collateral to the Proprietary Trading Network.
+
+**Options:**
+- `--wallet-name, --name` - Name of the wallet to use for collateral (required)
+- `--wallet-path` - Path to the wallet directory (default: `~/.bittensor/wallets`)
+- `--network` - Network to connect to (default: `test`)
+- `--amount` - Amount of TAO to use for collateral (default: 1)
+- `--dev` - Show verbose debug output
+
 #### List Collateral Balance
 ```bash
 ptncli collateral list [OPTIONS]
@@ -207,6 +220,15 @@ ptncli stake add --wallet-name my_wallet --all-hotkeys --amount 10.0 --network t
 ### View wallet overview
 ```bash
 ptncli wallet overview --wallet-name my_wallet --network finney
+```
+
+### Add collateral
+```bash
+# Add collateral on testnet
+ptncli collateral add --wallet-name my_wallet --amount 1.0 --network test
+
+# Add collateral on mainnet
+ptncli collateral add --wallet-name my_wallet --amount 1.0 --network finney
 ```
 
 ### Check collateral balance
