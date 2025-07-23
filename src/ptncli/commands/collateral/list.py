@@ -10,39 +10,46 @@ from ptncli.utils.api import make_api_request
 
 console = Console()
 
+
 def list_command(
-    miner_address: Optional[str] = typer.Option(
-        None,
-        "--miner-address",
-        "--miner_address",
-        help="Miner SS58 address to check collateral balance for",
-    ),
-    wallet_name: Optional[str] = typer.Option(
-        None,
-        "--wallet.name",
-        "--wallet-name",
-        "--wallet_name",
-        "--name",
-        help="Name of the wallet to use (will derive miner address from wallet)",
-    ),
-    wallet_path: str = typer.Option(
-        "~/.bittensor/wallets",
-        "--wallet.path",
-        "--wallet-path",
-        "--wallet_path",
-        "--path",
-        help="Path to the wallet directory",
-    ),
-    json_output: bool = typer.Option(
-        False,
-        "--json",
-        help="Output result as JSON",
-    ),
-    dev_mode: bool = typer.Option(
-        False,
-        "--dev",
-        help="Show debug information",
-    ),
+        miner_address: Optional[str] = typer.Option(
+            None,
+            "--miner-address",
+            "--miner_address",
+            help="Miner SS58 address to check collateral balance for",
+        ),
+        wallet_name: Optional[str] = typer.Option(
+            None,
+            "--wallet.name",
+            "--wallet-name",
+            "--wallet_name",
+            "--name",
+            help="Name of the wallet to use (will derive miner address from wallet)",
+        ),
+        wallet_path: str = typer.Option(
+            "~/.bittensor/wallets",
+            "--wallet.path",
+            "--wallet-path",
+            "--wallet_path",
+            "--path",
+            help="Path to the wallet directory",
+        ),
+        network: Optional[str] = typer.Option(
+            'finney',
+            "--network",
+            "--subtensor.network",
+            help="The subtensor network to connect to. Default: test.",
+        ),
+        json_output: bool = typer.Option(
+            False,
+            "--json",
+            help="Output result as JSON",
+        ),
+        dev_mode: bool = typer.Option(
+            False,
+            "--dev",
+            help="Show debug information",
+        ),
 ):
     """List collateral balance for a miner address"""
 
@@ -84,7 +91,7 @@ def list_command(
     endpoint = f"/collateral/balance/{miner_address}"
 
     try:
-        response = make_api_request(endpoint, method="GET", dev_mode=dev_mode)
+        response = make_api_request(endpoint, method="GET", dev_mode=dev_mode, network=network)
 
         if response is None:
             if json_output:
