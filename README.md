@@ -16,6 +16,15 @@ PTNCLI is in beta and is still under active development. Please report any issue
 
 PTNCLI sits on top of the bittensor-cli tool and extends it by customizing and hooking into commands. As a subnet on the Bittensor network, PTN operates on **subnet 8 (netuid: 8)** on the mainnet/finney network and **subnet 116 (netuid: 116)** on the testnet. PTN requires additional collateral setup during registration, which this tool automates alongside the standard subnet registration process.
 
+### Process Flow
+From a high level, here is what happens to register with collateral on PTN.
+
+1. Register your hotkey with PTN: `ptncli subnets register`
+2. Stake TAO into theta using your own hotkey: `ptncli stake add`
+3. Collateral add, which under the hood signs an extensic and sends the command off to the super validator. The super validator will then transfer the amount specified into our smart contract: `ptncli collateral add`
+4. (Optional) View collateral amount tracked in the contract: `ptncli collateral list`
+
+
 ### Network Targeting
 - **Mainnet/Finney**: Targets subnet 8 (netuid: 8)
 - **Testnet**: Targets subnet 116 (netuid: 116)
