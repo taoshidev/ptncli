@@ -22,7 +22,7 @@ build-backend = "pdm.backend"
 
 
 [project.scripts]
-ptncli = "ptncli.__main__:main"
+ptncli = "ptncli.__main__:app"
 
 [tool.pdm]
 distribution = true

@@ -41,7 +41,7 @@ async def register_subnet(
     if network:
         subtensor = SubtensorInterface(network)
     else:
-        subtensor = SubtensorInterface("test")
+        subtensor = SubtensorInterface("finney")  # Default to finney network
 
     try:
         async with subtensor:
@@ -82,11 +82,9 @@ def register(
         help="Path to the wallet directory",
     ),
     network: Optional[str] = typer.Option(
-        'test',
+        'finney',
         "--network",
         "--subtensor.network",
-        "--chain",
-        "--subtensor.chain_endpoint",
         help="The subtensor network to connect to. Default: test.",
     ),
     era: Optional[int] = typer.Option(

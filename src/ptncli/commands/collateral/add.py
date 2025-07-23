@@ -24,11 +24,9 @@ def add_command(
         help="Path to the wallet directory",
     ),
     network: Optional[str] = typer.Option(
-        'test',
+        'finney',
         "--network",
         "--subtensor.network",
-        "--chain",
-        "--subtensor.chain_endpoint",
         help="The subtensor network to connect to. Default: test.",
     ),
     amount: Optional[float] = typer.Option(
@@ -50,7 +48,7 @@ def add_command(
     console.print("[blue]Adding collateral to Proprietary Trading Network[/blue]")
 
     try:
-        result = asyncio.run(add_collateral(wallet=wallet, network=network or 'test', dev=dev, amount=amount))
+        result = asyncio.run(add_collateral(wallet=wallet, network=network or 'finney', dev=dev, amount=amount))
 
         if dev:
             print(result)

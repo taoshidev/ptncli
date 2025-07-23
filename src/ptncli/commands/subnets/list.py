@@ -6,11 +6,9 @@ from bittensor_cli.src.commands.subnets import subnets
 
 def list_command(
     network: Optional[str] = typer.Option(
-        None,
+        'finney',
         "--network",
         "--subtensor.network",
-        "--chain",
-        "--subtensor.chain_endpoint",
         help="The subtensor network to connect to. Default: finney.",
     ),
     verbose: bool = typer.Option(
@@ -79,4 +77,3 @@ async def list_subnets(
     except Exception as e:
         print(f"Error listing subnets: {e}")
         return False
-

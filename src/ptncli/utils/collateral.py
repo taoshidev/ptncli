@@ -12,7 +12,7 @@ from ..config import COLLATERAL_DEST_ADDRESS
 
 console = Console()
 
-async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = False, amount: Optional[float] = None) -> Optional[Dict[str, Any]]:
+async def add_collateral(wallet: Wallet, network: str = 'finney', dev: bool = False, amount: Optional[float] = None) -> Optional[Dict[str, Any]]:
   manager = CollateralManager(Network.TESTNET if network == 'test' else Network.MAINNET)
 
   password = getpass.getpass(prompt='Re-enter wallet password: ')
@@ -76,10 +76,10 @@ async def add_collateral(wallet: Wallet, network: str = 'test', dev: bool = Fals
       for stake_info in source_stake:
           # Format the hotkey address to show first 8 and last 6 characters
           formatted_hotkey = f"{stake_info.hotkey_ss58[:8]}...{stake_info.hotkey_ss58[-6:]}"
-          
+
           # Highlight the target netuid row
           netuid_style = "bold green" if stake_info.netuid == netuid else "magenta"
-          
+
           stake_table.add_row(
               formatted_hotkey,
               f"[{netuid_style}]{stake_info.netuid}[/{netuid_style}]",

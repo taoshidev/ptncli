@@ -687,13 +687,13 @@ async def run_stake_list(
     """Async wrapper for stake list functionality"""
     # Initialize wallet
     wallet = Wallet(name=wallet_name, path=wallet_path)
-    
-    # Initialize subtensor connection inside the async context
+
+    # Initialize subtensor connection
     if network:
         subtensor = SubtensorInterface(network)
     else:
-        subtensor = SubtensorInterface("test")
-    
+        subtensor = SubtensorInterface("finney")  # Default to finney network
+
     try:
         async with subtensor:
             await stake_list(
@@ -722,11 +722,9 @@ def list_command(
         help="Path to the wallet directory",
     ),
     network: Optional[str] = typer.Option(
-        'test',
+        'finney',
         "--network",
         "--subtensor.network",
-        "--chain",
-        "--subtensor.chain_endpoint",
         help="The subtensor network to connect to. Default: test.",
     ),
     coldkey_ss58: Optional[str] = typer.Option(
@@ -756,7 +754,7 @@ def list_command(
     ),
 ):
     """List stakes for a wallet"""
-    
+
     asyncio.run(run_stake_list(
         wallet_name=wallet_name,
         wallet_path=wallet_path,

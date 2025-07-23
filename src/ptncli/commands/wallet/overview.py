@@ -25,7 +25,7 @@ def overview_command(
     network: str = typer.Option(
         "finney",
         "--network",
-        "--net",
+        "--subtensor.network",
         help="Network to connect to"
     ),
     json_output: bool = typer.Option(
@@ -70,7 +70,7 @@ async def extended_wallet_overview(
     try:
         # Create SubtensorInterface instance
         subtensor = SubtensorInterface(network=network)
-        
+
         # Call the existing wallet overview functionality directly
         result = await wallets.overview(
             wallet=wallet,
@@ -88,4 +88,3 @@ async def extended_wallet_overview(
     except Exception as e:
         print(f"Error getting wallet overview: {e}")
         return None
-
