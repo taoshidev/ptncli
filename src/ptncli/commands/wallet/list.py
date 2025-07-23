@@ -25,8 +25,4 @@ async def extended_wallet_list(wallet_path: str = "~/.bittensor/wallets"):
     # Call the existing wallet list functionality directly
     result = await wallets.wallet_list(wallet_path, json_output=False)
 
-    # Add registration-specific logic here
-    print("\nRegistration status checking would be implemented here")
-
     return result
-

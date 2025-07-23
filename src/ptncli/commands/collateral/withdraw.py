@@ -1,5 +1,6 @@
 import typer
 import getpass
+import json
 from typing import Optional
 from bittensor_wallet import Wallet
 from rich.console import Console
@@ -7,6 +8,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from ptncli.utils.api import make_api_request
+from ptncli.config import PTN_API_BASE_URL_TESTNET, PTN_API_BASE_URL_MAINNET
 
 console = Console()
 
@@ -28,6 +30,12 @@ def withdraw_command(
         "~/.bittensor/wallets",
         "--wallet.path",
         help="Path to the wallet directory",
+    ),
+    network: str = typer.Option(
+        "finney",
+        "--network",
+        "--subtensor.network",
+        help="Network to use (finney or test)",
     ),
     prompt: bool = typer.Option(
         True,
@@ -67,17 +75,34 @@ def withdraw_command(
             console.print("[yellow]Withdrawal cancelled[/yellow]")
             return False
 
-    # Prepare payload for withdrawal
-    payload = {
+    # Prepare withdrawal data for signing
+    withdrawal_data = {
         "amount": amount,
         "miner_address": coldkey.ss58_address
     }
+    
+    # Create message to sign (sorted JSON)
+    message = json.dumps(withdrawal_data, sort_keys=True)
+    
+    # Sign the message with coldkey
+    signature = coldkey.sign(message.encode('utf-8')).hex()
+    
+    # Prepare payload for withdrawal (include signature)
+    payload = {
+        "amount": amount,
+        "miner_address": coldkey.ss58_address,
+        "signature": signature
+    }
 
+    # Determine which API base URL to use based on network
+    base_url = PTN_API_BASE_URL_TESTNET if network == "test" else PTN_API_BASE_URL_MAINNET
+    
     # Make the API request
     console.print("\n[cyan]Sending withdrawal request...[/cyan]")
+    console.print(f"[dim]Using network: {network}[/dim]")
 
     try:
-        response = make_api_request("/collateral/withdraw", payload)
+        response = make_api_request("/collateral/withdraw", payload, base_url=base_url)
 
         if response is None:
             console.print("[red]❌ Withdrawal request failed[/red]")

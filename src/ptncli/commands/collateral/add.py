@@ -6,6 +6,7 @@ from rich.console import Console
 
 from ptncli.utils.collateral import add_collateral
 from ptncli.utils.api import make_api_request
+from ptncli.config import PTN_API_BASE_URL_TESTNET, PTN_API_BASE_URL_MAINNET
 
 console = Console()
 
@@ -71,8 +72,11 @@ def add_command(
                 "extrinsic": encoded_data,
             }
 
+            # Determine the base URL based on network
+            base_url = PTN_API_BASE_URL_TESTNET if network == "test" else PTN_API_BASE_URL_MAINNET
+            
             # Use the new API utility
-            response = make_api_request("/collateral/deposit", payload)
+            response = make_api_request("/collateral/deposit", payload, base_url=base_url)
 
             if response is None:
                 console.print("[yellow]⚠️ API call failed[/yellow]")

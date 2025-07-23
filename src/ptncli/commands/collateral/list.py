@@ -7,6 +7,7 @@ from rich.table import Table
 from bittensor_wallet import Wallet
 
 from ptncli.utils.api import make_api_request
+from ptncli.config import PTN_API_BASE_URL_TESTNET, PTN_API_BASE_URL_MAINNET
 
 console = Console()
 
@@ -32,6 +33,12 @@ def list_command(
         "--wallet_path",
         "--path",
         help="Path to the wallet directory",
+    ),
+    network: str = typer.Option(
+        "finney",
+        "--network",
+        "--subtensor.network",
+        help="The subtensor network to connect to. Default: finney.",
     ),
     json_output: bool = typer.Option(
         False,
@@ -80,11 +87,14 @@ def list_command(
         console.print(panel)
         console.print("[blue]Checking collateral balance[/blue]")
 
+    # Determine the base URL based on network
+    base_url = PTN_API_BASE_URL_TESTNET if network == "test" else PTN_API_BASE_URL_MAINNET
+    
     # Make the API request
     endpoint = f"/collateral/balance/{miner_address}"
 
     try:
-        response = make_api_request(endpoint, method="GET", dev_mode=dev_mode)
+        response = make_api_request(endpoint, method="GET", base_url=base_url, dev_mode=dev_mode)
 
         if response is None:
             if json_output:

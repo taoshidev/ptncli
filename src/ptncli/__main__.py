@@ -58,7 +58,7 @@ def main(
         "--help",
         "-h",
         callback=help_callback,
-        is_eager=False,
+        is_eager=True,
         help="Show help and exit"
     )
 ):
