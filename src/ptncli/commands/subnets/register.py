@@ -19,7 +19,6 @@ async def register_subnet(
     network: Optional[str] = None,
     era: Optional[int] = None,
     json_output: bool = False,
-    prompt: bool = True,
 ):
     """
     Register a neuron to a subnet by recycling TAO.
@@ -66,8 +65,8 @@ def register(
         "--name",
         help="Name of the wallet to use for registration",
     ),
-    wallet_hotkey: str = typer.Option(
-        None,
+    hotkey: str = typer.Option(
+        "default",
         "--wallet.hotkey",
         "--wallet-hotkey",
         "--wallet_hotkey",
@@ -95,25 +94,17 @@ def register(
         "--json",
         help="Output result as JSON.",
     ),
-    prompt: bool = typer.Option(
-        True,
-        "--prompt/--no-prompt",
-        help="Whether to prompt for confirmation",
-    ),
     dev: bool = typer.Option(
         False,
         "--dev",
         help="Show verbose debug output",
     ),
 ):
-    # Set netuid based on network
-    netuid = 116 if network == 'test' else 8
-
     # Display the main title with Rich Panel
     title = Text("🔗 PROPRIETARY TRADING NETWORK 🔗", style="bold blue")
     subtitle = Text("Registration & Collateral Setup", style="italic cyan")
 
-    wallet = Wallet(name=wallet_name, path=wallet_path)
+    wallet = Wallet(name=wallet_name, path=wallet_path, hotkey=hotkey)
 
     panel = Panel.fit(
         f"{title}\n{subtitle}",
@@ -138,7 +129,6 @@ def register(
                 network=network,
                 era=era,
                 json_output=json_output,
-                prompt=prompt,
             ))
 
             progress.stop()

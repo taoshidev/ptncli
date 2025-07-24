@@ -22,6 +22,14 @@ def overview_command(
         "--wallet.path",
         help="Path to wallets directory"
     ),
+    wallet_hotkey: str = typer.Option(
+        "default",
+        "--wallet-hotkey",
+        "--hotkey",
+        "--wallet_hotkey",
+        "--wallet.hotkey",
+        help="Hotkey of the wallet."
+    ),
     network: str = typer.Option(
         "finney",
         "--network",
@@ -38,6 +46,7 @@ def overview_command(
     asyncio.run(extended_wallet_overview(
         wallet_name=wallet_name,
         wallet_path=wallet_path,
+        wallet_hotkey=wallet_hotkey,
         network=network,
         json_output=json_output
     ))
@@ -45,6 +54,7 @@ def overview_command(
 async def extended_wallet_overview(
     wallet_name: str,
     wallet_path: str = "~/.bittensor/wallets",
+    wallet_hotkey: str = "default",
     network: str = "finney",
     json_output: bool = False
 ):
@@ -61,7 +71,7 @@ async def extended_wallet_overview(
     expanded_path = os.path.expanduser(wallet_path)
 
     # Create wallet object
-    wallet = Wallet(name=wallet_name, path=expanded_path)
+    wallet = Wallet(name=wallet_name, path=expanded_path, hotkey=wallet_hotkey)
 
     print(f"Wallet Overview: {wallet_name}")
     print(f"Wallet path: {expanded_path}")

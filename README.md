@@ -58,6 +58,7 @@ Shows detailed wallet information including balance and registration status.
 
 **Options:**
 - `--wallet-name, --name` - Name of the wallet
+- `--wallet.hotkey, --hotkey` - Name of the hotkey to use
 - `--wallet-path, --path` - Path to wallets directory (default: `~/.bittensor/wallets`)
 - `--network` - Network to connect to (default: `finney`)
 - `--json` - Output result as JSON
@@ -86,7 +87,7 @@ Registers a neuron to the Proprietary Trading Network with automatic collateral 
 
 **Options:**
 - `--wallet-name, --name` - Name of the wallet to use for registration
-- `--wallet-hotkey, --hotkey` - Name of the hotkey to use
+- `--wallet.hotkey, --hotkey` - Name of the hotkey to use
 - `--wallet-path` - Path to wallet directory (default: `~/.bittensor/wallets`)
 - `--network` - Network to connect to (default: `test`)
 - `--era` - Era to register for
@@ -105,8 +106,8 @@ Add stake to hotkeys on the Proprietary Trading Network. Automatically targets:
 
 **Options:**
 - `--wallet-name, --name` - Name of the wallet to use (required)
+- `--wallet.hotkey, --hotkey` - Hotkey name to use for staking
 - `--wallet-path, --path` - Path to wallets directory (default: `~/.bittensor/wallets`)
-- `--hotkey` - Hotkey name to use for staking
 - `--network` - Network to connect to (default: `finney`)
 - `--amount` - Amount of TAO to stake
 
@@ -149,6 +150,7 @@ Check collateral balance for a miner address.
 **Options:**
 - `--miner-address, --miner_address` - Miner SS58 address to check collateral balance for (required)
 - `--wallet-name, --name` - Name of the wallet (for display purposes)
+- `--wallet.hotkey, --hotkey` - Name of the hotkey to use
 - `--json` - Output result as JSON
 
 #### Withdraw Collateral
@@ -161,6 +163,7 @@ Withdraw collateral from the Proprietary Trading Network.
 - `--amount` - Amount to withdraw from collateral (required)
 - `--miner-address, --miner_address` - Miner SS58 address to withdraw collateral for (required)
 - `--wallet-name, --name` - Name of the wallet (for display purposes)
+- `--wallet.hotkey, --hotkey` - Name of the hotkey to use
 - `--wallet-path` - Path to wallet directory (default: `~/.bittensor/wallets`)
 - `--prompt/--no-prompt` - Whether to prompt for confirmation
 

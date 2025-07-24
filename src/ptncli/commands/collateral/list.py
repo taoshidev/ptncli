@@ -26,6 +26,14 @@ def list_command(
         "--name",
         help="Name of the wallet to use (will derive miner address from wallet)",
     ),
+    wallet_hotkey: str = typer.Option(
+        "default",
+        "--wallet.hotkey",
+        "--wallet-hotkey",
+        "--wallet_hotkey",
+        "--hotkey",
+        help="Hotkey of the wallet",
+    ),
     wallet_path: str = typer.Option(
         "~/.bittensor/wallets",
         "--wallet.path",
@@ -64,7 +72,7 @@ def list_command(
     # If wallet_name is provided, derive the miner address from the wallet
     if wallet_name:
         try:
-            wallet = Wallet(name=wallet_name, path=wallet_path)
+            wallet = Wallet(name=wallet_name, path=wallet_path, hotkey=wallet_hotkey)
             miner_address = wallet.get_coldkey().ss58_address
         except Exception as e:
             if json_output:
@@ -89,7 +97,7 @@ def list_command(
 
     # Determine the base URL based on network
     base_url = PTN_API_BASE_URL_TESTNET if network == "test" else PTN_API_BASE_URL_MAINNET
-    
+
     # Make the API request
     endpoint = f"/collateral/balance/{miner_address}"
 

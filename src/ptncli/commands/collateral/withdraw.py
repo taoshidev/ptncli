@@ -31,6 +31,14 @@ def withdraw_command(
         "--wallet.path",
         help="Path to the wallet directory",
     ),
+    wallet_hotkey: str = typer.Option(
+        "default",
+        "--wallet.hotkey",
+        "--wallet-hotkey",
+        "--wallet_hotkey",
+        "--hotkey",
+        help="Hotkey of the wallet",
+    ),
     network: str = typer.Option(
         "finney",
         "--network",
@@ -59,7 +67,7 @@ def withdraw_command(
     console.print("[blue]Withdrawing collateral from PTN[/blue]")
 
     # Load wallet and get keys
-    wallet = Wallet(name=wallet_name, path=wallet_path)
+    wallet = Wallet(name=wallet_name, path=wallet_path, hotkey=wallet_hotkey)
     password = getpass.getpass(prompt='Re-enter wallet password: ')
 
     coldkey = wallet.get_coldkey(password=password)
@@ -80,13 +88,13 @@ def withdraw_command(
         "amount": amount,
         "miner_address": coldkey.ss58_address
     }
-    
+
     # Create message to sign (sorted JSON)
     message = json.dumps(withdrawal_data, sort_keys=True)
-    
+
     # Sign the message with coldkey
     signature = coldkey.sign(message.encode('utf-8')).hex()
-    
+
     # Prepare payload for withdrawal (include signature)
     payload = {
         "amount": amount,
@@ -96,7 +104,7 @@ def withdraw_command(
 
     # Determine which API base URL to use based on network
     base_url = PTN_API_BASE_URL_TESTNET if network == "test" else PTN_API_BASE_URL_MAINNET
-    
+
     # Make the API request
     console.print("\n[cyan]Sending withdrawal request...[/cyan]")
     console.print(f"[dim]Using network: {network}[/dim]")
