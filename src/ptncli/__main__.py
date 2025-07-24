@@ -1,6 +1,6 @@
 import typer
 import sys
-import tomllib
+import tomli
 from pathlib import Path
 
 def get_version() -> str:
@@ -8,7 +8,7 @@ def get_version() -> str:
     try:
         pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
-            data = tomllib.load(f)
+            data = tomli.load(f)
         return data["project"]["version"]
     except Exception:
         return "unknown"
