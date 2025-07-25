@@ -117,7 +117,7 @@ def withdraw_command(
             return False
 
         # Check if withdrawal was successful
-        if response.get("success", False):
+        if response.get("successfully_processed") is not None:
             console.print("[green]✅ Collateral withdrawal successful![/green]")
 
             # Show success panel
@@ -129,10 +129,13 @@ def withdraw_command(
             console.print(success_panel)
             return True
         else:
-            error_msg = response.get("error", "Unknown error occurred")
-            console.print(f"[red]❌ Withdrawal failed: {error_msg}[/red]")
+            error_message = (
+                response.get("error_message") or
+                response.get("error") or
+                "An unknown error occurred."
+            )
+            console.print(f"[red]❌ Withdrawal failed: {error_message}[/red]")
             return False
-
     except Exception as e:
         console.print(f"[red]❌ Error during withdrawal: {e}[/red]")
         return False

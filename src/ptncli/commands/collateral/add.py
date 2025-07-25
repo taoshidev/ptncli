@@ -164,7 +164,7 @@ async def add_collateral(
   }
 
   if dev:
-    console.print("[cyan]Returning result:[/cyan]")
+    console.print("[cyan]Request:[/cyan]")
     console.print(json.dumps(result_dict, indent=2, default=str))
 
   return result_dict
@@ -254,7 +254,15 @@ def add_command(
             if response is None:
                 console.print("[yellow]⚠️ API call failed[/yellow]")
             else:
-                console.print("[green]✅ Collateral added successfully![/green]")
+                if response.get("successfully_processed") is not None:
+                    console.print("[green]✅ Collateral added successfully![/green]")
+                else:
+                    error_message = (
+                        response.get("error_message") or
+                        response.get("error") or
+                        "An unknown error occurred."
+                    )
+                    console.print(f"[red]❌ Deposit failed: {error_message}[/red]")
 
         except Exception as api_error:
             console.print(f"[yellow]⚠️ API call failed: {api_error}[/yellow]")

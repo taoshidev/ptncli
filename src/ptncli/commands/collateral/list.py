@@ -118,7 +118,6 @@ def list_command(
             return True
 
         # Display results in a nice table format
-        balance_rao = response.get("balance_rao", 0)
         balance_theta = response.get("balance_theta", 0.0)
 
         # Create a table for the results
@@ -130,20 +129,25 @@ def list_command(
             table.add_row("Wallet Name", wallet_name)
 
         table.add_row("Miner Address", miner_address)
-        table.add_row("Collateral Balance (RAO)", str(balance_rao))
         table.add_row("Collateral Balance (THETA)", str(balance_theta))
 
         console.print(table)
 
         # Show success message (only in dev mode)
-        if response.get("success", True):
-            if dev_mode:
-                console.print("[green]✅ Collateral balance retrieved successfully![/green]")
-            return True
+        if response is None:
+            console.print("[yellow]⚠️ API call failed[/yellow]")
         else:
-            error_msg = response.get("error", "Unknown error occurred")
-            console.print(f"[red]❌ Error: {error_msg}[/red]")
-            return False
+            if response.get("balance_theta") is not None:
+                if dev_mode:
+                    console.print("[green]✅ Collateral balance retrieved successfully![/green]")
+                return True
+            else:
+                error_message = (
+                    response.get("error") or
+                    "An unknown error occurred."
+                )
+                console.print(f"[red]❌ Error: {error_message}[/red]")
+                return False
 
     except Exception as e:
         if json_output:
