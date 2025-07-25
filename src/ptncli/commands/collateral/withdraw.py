@@ -117,7 +117,7 @@ def withdraw_command(
             return False
 
         # Check if withdrawal was successful
-        if response.get("successfully_processed") is not None:
+        if response.get("successfully_processed"):
             console.print("[green]✅ Collateral withdrawal successful![/green]")
 
             # Show success panel

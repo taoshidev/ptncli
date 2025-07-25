@@ -254,7 +254,7 @@ def add_command(
             if response is None:
                 console.print("[yellow]⚠️ API call failed[/yellow]")
             else:
-                if response.get("successfully_processed") is not None:
+                if response.get("successfully_processed"):
                     console.print("[green]✅ Collateral added successfully![/green]")
                 else:
                     error_message = (
