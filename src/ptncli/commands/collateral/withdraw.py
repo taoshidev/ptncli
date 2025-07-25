@@ -70,7 +70,7 @@ def withdraw_command(
     wallet = Wallet(name=wallet_name, path=wallet_path, hotkey=wallet_hotkey)
     password = getpass.getpass(prompt='Re-enter wallet password: ')
 
-    coldkey = wallet.get_coldkey(password=password)
+    coldkey = wallet.get_coldkey(password=password) if password else wallet.coldkey
 
     # Show withdrawal details
     console.print(f"[cyan]Amount to withdraw:[/cyan] {amount}")
@@ -78,7 +78,7 @@ def withdraw_command(
     console.print(f"[cyan]Miner address:[/cyan] {coldkey.ss58_address}")
 
     if prompt:
-        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} collateral for miner {coldkey.ss58_address}?")
+        confirm = typer.confirm(f"Are you sure you want to withdraw {amount} Theta collateral for miner {coldkey.ss58_address}?")
         if not confirm:
             console.print("[yellow]Withdrawal cancelled[/yellow]")
             return False

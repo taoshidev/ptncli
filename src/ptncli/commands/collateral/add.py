@@ -10,7 +10,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from collateral_sdk import CollateralManager, Network
 from ptncli.utils.api import make_api_request
-from ptncli.config import PTN_API_BASE_URL_TESTNET, PTN_API_BASE_URL_MAINNET, COLLATERAL_DEST_ADDRESS
+from ptncli.config import PTN_API_BASE_URL_TESTNET, PTN_API_BASE_URL_MAINNET, COLLATERAL_DEST_ADDRESS_TESTNET, COLLATERAL_DEST_ADDRESS_MAINNET
 
 console = Console()
 
@@ -27,8 +27,8 @@ async def add_collateral(
   wallet = Wallet(name=wallet_name, path=wallet_path, hotkey=wallet_hotkey)
   password = getpass.getpass(prompt='Enter wallet password: ')
 
-  coldkey = wallet.get_coldkey(password=password)
-  hotkey = wallet.get_hotkey(password=password)
+  coldkey = wallet.get_coldkey(password=password) if password else wallet.coldkey
+  hotkey = wallet.get_hotkey(password=password) if password else wallet.hotkey          # TODO: these passwords may not be the same?
 
   # Set netuid based on network
   netuid = 116 if network == 'test' else 8
@@ -100,12 +100,13 @@ async def add_collateral(
               f"{float(stake_info.locked):.4f}",
               "✅" if stake_info.is_registered else "❌"
           )
-
-          # Set matching_stake for the target netuid
-          if stake_info.netuid == netuid:
-              matching_stake = stake_info
-
       console.print(stake_table)
+
+      # Set matching_stake
+      matching_stake = next(
+          (stake for stake in source_stake if (stake.hotkey_ss58 == hotkey.ss58_address and stake.netuid == netuid)),
+          None
+      )
   else:
       console.print("[yellow]No stake information available[/yellow]")
 
@@ -116,18 +117,22 @@ async def add_collateral(
       return None
 
   if not matching_stake:
-      console.print(f"[red]❌ No stake found for netuid {netuid}[/red]")
+      console.print(f"[red]❌ No stake found for hotkey {hotkey} on netuid {netuid}[/red]")
       return None
 
   if dev:
     console.print("[yellow]🔄 Creating stake transfer extrinsic...[/yellow]")
 
   # Use provided amount or default to 1 TAO
-  collateral_amount = amount if amount is not None else 0
+  metagraph = manager.subtensor_api.metagraphs.metagraph(netuid=netuid)
+  pool = metagraph.pool
+  theta_price = pool.tao_in / pool.alpha_in
+
+  collateral_amount = amount * theta_price if amount is not None else 0
   amount = int(collateral_amount * 10**9)
 
   # Use configured dest address
-  dest_address = COLLATERAL_DEST_ADDRESS
+  dest_address = COLLATERAL_DEST_ADDRESS_TESTNET if network == 'test' else COLLATERAL_DEST_ADDRESS_MAINNET
 
   # Create an extrinsic for a stake transfer.
   extrinsic = manager.create_stake_transfer_extrinsic(
@@ -173,6 +178,14 @@ def add_command(
         "--name",
         help="Name of the wallet to use for collateral",
     ),
+    wallet_hotkey: str = typer.Option(
+        None,
+        "--wallet.hotkey",
+        "--wallet-hotkey",
+        "--wallet_hotkey",
+        "--hotkey",
+        help="Hotkey of the wallet to use for collateral",
+    ),
     wallet_path: str = typer.Option(
         "~/.bittensor/wallets",
         "--wallet.path",
@@ -187,7 +200,7 @@ def add_command(
     amount: Optional[float] = typer.Option(
         None,
         "--amount",
-        help="Amount of TAO to use for collateral (default: 1)",
+        help="Amount of Theta to use for collateral (default: 1)",
     ),
     dev: bool = typer.Option(
         False,
@@ -207,7 +220,8 @@ def add_command(
           dev=dev,
           amount=amount,
           wallet_path=wallet_path,
-          wallet_name=wallet_name
+          wallet_name=wallet_name,
+          wallet_hotkey=wallet_hotkey
         ))
 
         if dev:
