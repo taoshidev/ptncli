@@ -12,6 +12,9 @@ from ptn_cli.src.commands.collateral import (
     deposit as deposit_collateral,
     withdraw as withdraw_collateral
 )
+from ptn_cli.src.commands.asset import (
+    list as list_asset
+)
 
 _epilog = "Made with [bold red]:heart:[/bold red] by The Proprieτary Trading Neτwork"
 
@@ -38,16 +41,25 @@ class PTNOptions:
 class PTNCLIManager(CLIManager):
 
     collateral_app: typer.Typer
+    asset_app: typer.Typer
 
     def __init__(self):
         super().__init__()
 
         self.collateral_app = typer.Typer(epilog=_epilog)
+        self.asset_app = typer.Typer(epilog=_epilog)
 
         self.app.add_typer(
             self.collateral_app,
             name="collateral",
             short_help="Collateral commands, aliasas: `collateral`",
+            no_args_is_help=True
+        )
+
+        self.app.add_typer(
+            self.asset_app,
+            name="asset",
+            short_help="Asset commands, aliases: `asset`",
             no_args_is_help=True
         )
 
@@ -60,6 +72,10 @@ class PTNCLIManager(CLIManager):
         self.collateral_app.command(
             "withdraw", rich_help_panel="Collateral Operations"
         )(self.collateral_withdraw)
+
+        self.asset_app.command(
+            "list", rich_help_panel="Asset Management"
+        )(self.asset_list)
 
     def collateral_list(
         self,
@@ -174,6 +190,21 @@ class PTNCLIManager(CLIManager):
                 verbose,
                 json_output
             )
+        )
+
+    def asset_list(
+        self,
+        quiet: bool = Options.quiet,
+        verbose: bool = Options.verbose,
+        json_output: bool = Options.json_output,
+    ):
+        """
+        List assets in the Proprieτary Trading Neτwork
+        """
+        self.verbosity_handler(quiet, verbose, json_output)
+
+        return self._run_command(
+            list_asset.asset_list()
         )
 
 
